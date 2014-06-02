@@ -19,54 +19,67 @@ using System.IO;
 using System.Diagnostics;
 
 using Dynastream.Fit;
+using fit = Dynastream.Fit;
 
 namespace EncodeDemo
 {
-   class Program
-   {
-      static void Main(string[] args)
-      {                                                   
-         Stopwatch stopwatch = new Stopwatch();
-	      stopwatch.Start();
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
 
-         // Generate some FIT messages
-         FileIdMesg fileIdMesg = new FileIdMesg();
-         fileIdMesg.SetManufacturer(Manufacturer.Dynastream);  // Types defined in the profile are available
-         fileIdMesg.SetProduct(1000);
-         fileIdMesg.SetSerialNumber(12345);
+            // Generate some FIT messages
+            FileIdMesg fileIdMesg = new FileIdMesg();
+            fileIdMesg.SetManufacturer(Manufacturer.Dynastream);  // Types defined in the profile are available
+            fileIdMesg.SetProduct(1000);
+            fileIdMesg.SetSerialNumber(12345);
 
-         UserProfileMesg myUserProfile = new UserProfileMesg();
-         myUserProfile.SetGender(Gender.Female);
-         float myWeight = 63.1F;
-         myUserProfile.SetWeight(myWeight);         
-         myUserProfile.SetAge(99);                           
-         myUserProfile.SetFriendlyName(Encoding.UTF8.GetBytes("TestUser"));
+            UserProfileMesg myUserProfile = new UserProfileMesg();
+            myUserProfile.SetGender(Gender.Female);
+            float myWeight = 63.1F;
+            myUserProfile.SetWeight(myWeight);
+            myUserProfile.SetAge(99);
+            myUserProfile.SetFriendlyName(Encoding.UTF8.GetBytes("TestUser"));
 
-         CourseMesg course = new CourseMesg
-         {
-             
-         };
-              
-         FileStream fitDest = new FileStream("Test.fit", FileMode.Create, FileAccess.ReadWrite, FileShare.Read);         
+            CourseMesg course = new CourseMesg();
+            course.SetName(Encoding.UTF8.GetBytes("BLA"));
+            course.SetSport(Sport.Cycling);
 
-         // Create file encode object
-         Encode encodeDemo = new Encode();         
-         // Write our header
-         encodeDemo.Open(fitDest);         
-         // Encode each message, a definition message is automatically generated and output if necessary
-         encodeDemo.Write(fileIdMesg);
-         encodeDemo.Write(myUserProfile);      
-   
-         // Update header datasize and file CRC
-         encodeDemo.Close();
 
-         fitDest.Close();
+            var point = new RecordMesg();
+            point.SetPositionLat(491829325);
+            point.SetPositionLong(12838824);
+            point.SetDistance(10665.65f);
+            point.SetAltitude(479.4f);
+            point.SetTimestamp(new fit.DateTime(System.DateTime.Now.AddDays(-1)));
 
-         Console.WriteLine("Encoded FIT file test.fit");
-         stopwatch.Stop();
-         Console.WriteLine("Time elapsed: {0:0.#}s", stopwatch.Elapsed.TotalSeconds);
 
-         Console.ReadKey();
-      }
-   }
+            FileStream fitDest = new FileStream("Test.fit", FileMode.Create, FileAccess.ReadWrite, FileShare.Read);
+
+            // Create file encode object
+            Encode encodeDemo = new Encode();
+            // Write our header
+            encodeDemo.Open(fitDest);
+            // Encode each message, a definition message is automatically generated and output if necessary
+            encodeDemo.Write(fileIdMesg);
+            encodeDemo.Write(myUserProfile);
+
+            encodeDemo.Write(course);
+
+            encodeDemo.Write(point);
+
+            // Update header datasize and file CRC
+            encodeDemo.Close();
+
+            fitDest.Close();
+
+            Console.WriteLine("Encoded FIT file test.fit");
+            stopwatch.Stop();
+            Console.WriteLine("Time elapsed: {0:0.#}s", stopwatch.Elapsed.TotalSeconds);
+
+            Console.ReadKey();
+        }
+    }
 }
