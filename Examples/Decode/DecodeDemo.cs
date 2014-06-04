@@ -40,7 +40,7 @@ namespace DecodeDemo
 
         public void Foo()
         {
-            using (var fitDest = new FileStream("Test2.fit", FileMode.Create, FileAccess.ReadWrite, FileShare.Read))
+            using (var fitDest = new FileStream("Test.fit", FileMode.Create, FileAccess.ReadWrite, FileShare.Read))
             {
 
                 Encoder = new Encode();
@@ -59,7 +59,7 @@ namespace DecodeDemo
                 //}            
 
                 // Attempt to open .FIT file
-                var fileName = "Test.fit";
+                var fileName = "B1.fit";
                 fitSource = new FileStream(fileName, FileMode.Open);
                 logger.Trace("Opening {0}", fileName);
 
@@ -101,6 +101,8 @@ namespace DecodeDemo
                 }
                 fitSource.Close();
 
+                Encoder.Close();
+
                 logger.Trace("");
                 logger.Trace("Summary:");
                 int totalMesgs = 0;
@@ -137,12 +139,15 @@ namespace DecodeDemo
 
             for (byte i = 0; i < e.mesg.GetNumFields(); i++)
             {
+                var field = e.mesg.fields[i];
+                var f = new Field(field.Name, field.Num, field.Type, field.Scale, field.Offset, field.Units);
                 for (int j = 0; j < e.mesg.fields[i].GetNumValues(); j++)
                 {
                     logger.Trace("\tField{0} Index{1} (\"{2}\" Field#{4}) Value: {3} (raw value {5})", i, j, e.mesg.fields[i].GetName(), e.mesg.fields[i].GetValue(j), e.mesg.fields[i].Num, e.mesg.fields[i].GetRawValue(j));
-                    var field = e.mesg.fields[i];
-                    msg.SetField(new Field(field.Name, field.Num, field.Type, field.Scale, field.Offset, field.Units));
+
+                    f.SetValue(j, field.GetValue(j));
                 }
+                msg.SetField(field);
             }
 
             Encoder.Write(msg);
