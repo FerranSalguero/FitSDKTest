@@ -20,6 +20,7 @@ using System.Diagnostics;
 
 using Dynastream.Fit;
 using fit = Dynastream.Fit;
+using SharpGpx;
 
 namespace EncodeDemo
 {
@@ -43,11 +44,13 @@ namespace EncodeDemo
             //myUserProfile.SetAge(99);
             //myUserProfile.SetFriendlyName(Encoding.UTF8.GetBytes("TestUser"));
 
+            var route = GpxClass.FromFile("route.gpx");
+
             CourseMesg course = new CourseMesg();
-            course.SetName(Encoding.UTF8.GetBytes("BLA"));
+            course.SetName(Encoding.UTF8.GetBytes(route.metadata.name));
             course.SetSport(Sport.Cycling);
 
-            var baseDate = System.DateTime.Now.AddDays(-1);
+            var baseDate = route.metadata.timeSpecified ? route.metadata.time : System.DateTime.Now.AddDays(-1);
 
             var lap = new LapMesg();
             lap.SetTimestamp(new fit.DateTime(baseDate));
